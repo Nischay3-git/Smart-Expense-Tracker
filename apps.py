@@ -93,6 +93,85 @@ def dashboard():
     # Extract total amounts ---> separate list
     amounts = [x[1] for x in category_data]
 
+    # PIE CHART
+    # Har user ka separate pie chart save hoga
+    pie_file = f"pie_{session['user_id']}.png"
+
+    plt.clf()
+
+    if category_data:
+
+        plt.figure(figsize=(5,5))
+        # Category-wise expense percentage show karega
+        plt.pie(
+            amounts,
+            labels=categories,
+            autopct='%1.1f%%'
+        )
+
+        plt.title("Overall Category Distribution")
+
+        plt.savefig(f"static/{pie_file}")
+
+    # MONTHLY TREND
+    monthly_totals = defaultdict(float)
+    # Loop through expense records
+    for _, amount, date in rows:
+
+        dt = datetime.strptime(date, "%Y-%m-%d")
+
+        month_key = dt.strftime("%b %Y")
+
+        monthly_totals[month_key] += amount
+
+    sorted_months = sorted(
+        monthly_totals.keys(),
+        key=lambda x: datetime.strptime(x, "%b %Y")
+    )
+
+    month_labels = sorted_months
+
+    month_values = [
+        monthly_totals[m]
+        for m in sorted_months
+    ]
+
+    # BAR CHART
+    bar_file = f"bar_{session['user_id']}.png"
+
+    plt.clf()
+    # Check if month data exists ki nhi
+    if month_labels:
+
+        plt.figure(figsize=(7,4))
+
+        plt.bar(month_labels, month_values)
+
+        plt.title("Monthly Expense Trend")
+
+        plt.xlabel("Month")
+        plt.ylabel("Amount")
+
+        plt.xticks(rotation=45)
+
+        plt.tight_layout()
+
+        plt.savefig(f"static/{bar_file}")
+
+    total = sum(month_values)
+
+    version = int(time.time())
+    
+    # dashboard.html pe bhejo
+    return render_template(
+        "dashboard.html",
+        total=total,
+        category_data=category_data,
+        version=version,
+        pie_file=pie_file,
+        bar_file=bar_file
+    )
+
 # ---------------- ADD EXPENSE ----------------
 @app.route("/add", methods=["GET", "POST"])
 def add():
