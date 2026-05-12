@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Tracker</title>
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111;
+            --card: #f5f5f5;
+            --border: #ddd;
+            --accent: #007bff;
+        }
+
+        body.dark {
+            --bg: #0f1117;
+            --text: #e6e6e6;
+            --card: #151821;
+            --border: #222;
+            --accent: #4cc9f0;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-left a {
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-left a:hover {
+            opacity: 0.7;
+        }
+
+        /* DROPDOWN */
+        .dropdown-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 25px;
+            left: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 120px;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 5px 0;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .dropdown-menu a:hover {
+            opacity: 0.7;
+        }
+
+        .dropdown-container:hover .dropdown-menu {
+            display: block;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-btn {
+            cursor: pointer;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        /* CONTAINER */
+        .container {
+            padding: 30px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            font-size: 28px;
+            color: var(--accent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: #888;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% if session.get("user_id") %}
+<div class="navbar">
+
+    <!-- LEFT SIDE -->
+    <div class="nav-left">
+
+        <a href="/dashboard">Dashboard</a>
+
+        <!-- 🔽 DROPDOWN (THIS IS WHERE YOU ADD IT) -->
+        <div class="dropdown-container">
+            <span>Analytics ▾</span>
+
+            <div class="dropdown-menu">
+                <a href="/monthly">Monthly</a>
+                <!-- future: yearly, category etc -->
+            </div>
+        </div>
+
+        <a href="/add">Add</a>
+        <a href="/logout">Logout</a>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="nav-right">
+        Hello, {{ session.get("username")|title }}
+
+        <span class="toggle-btn" onclick="toggleTheme()" id="themeIcon">🌙</span>
+    </div>
+
+</div>
+{% endif %}
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+<script>
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+    const icon = document.getElementById("themeIcon");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem("theme", "dark");
+        icon.innerText = "☀️";
+    } else {
+        localStorage.setItem("theme", "light");
+        icon.innerText = "🌙";
+    }
+}
+
+window.onload = function() {
+    const theme = localStorage.getItem("theme");
+    const icon = document.getElementById("themeIcon");
+
+    if (theme === "dark") {
+        document.body.classList.add("dark");
+        if (icon) icon.innerText = "☀️";
+    }
+}
+</script>
+
+</body>
+</html>
