@@ -14,11 +14,11 @@ app.secret_key = "secret123"
 create_tables()
 
 @app.route("/", methods=["GET", "POST"])
-def login():
+def login():# login page k liye
     if request.method == "GET":
         session.clear()   
 
-    if request.method == "POST":
+    if request.method == "POST":#username and password for authentication - apne data sey check karo if present or not
         user = request.form["username"]
         pwd = request.form["password"]
 
@@ -30,13 +30,13 @@ def login():
         if data:
             session["user_id"] = data[0]
             session["username"] = user
-            return redirect("/dashboard")
+            return redirect("/dashboard")   # agar sahi hai then redirect to dashboard url
 
     return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "POST":
+    if request.method == "POST":    #naye user ka credentials store karo
         user = request.form["username"]
         pwd = request.form["password"]
 
@@ -97,7 +97,7 @@ def dashboard():
 # ---------------- LOGOUT ----------------
 @app.route("/logout")
 def logout():
-    session.clear()   
+    session.clear()   #agar user logout karey toh login page  mey jao wapis
     return redirect("/")
 
 @app.after_request
