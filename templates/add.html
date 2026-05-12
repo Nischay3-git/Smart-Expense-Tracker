@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Add Expense</h2>
+
+<form method="POST">
+    Amount: <input name="amount"><br>
+    Category: <input name="category"><br>
+    Date: <input type="date" name="date"><br>
+    <button>Add</button>
+</form>
+
+{% endblock %}
