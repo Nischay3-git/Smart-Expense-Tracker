@@ -48,7 +48,50 @@ def register():
         return redirect("/")
 
     return render_template("register.html")
-# --------------write your code here-----------------
+
+# ---------------- DASHBOARD ----------------
+@app.route("/dashboard")
+def dashboard():
+    # Check if user logged in hai ya nahi
+    # Agar session me user_id nahi hai then redirect to login/home page
+    if "user_id" not in session:
+        return redirect("/")
+
+    # Connecting database
+    conn = connect_db()
+    cur = conn.cursor()
+
+    # Logged-in user ke expenses fetch
+    # Category, amount aur date fetch
+    # Latest expenses pehle show honge
+    cur.execute("""
+        SELECT category, amount, date
+        FROM expenses
+        WHERE user_id = ?
+        ORDER BY date DESC
+    """, (session["user_id"],))
+
+    rows = cur.fetchall()
+
+    conn.close()
+
+    # CATEGORY TOTALS
+    category_totals = defaultdict(float)
+    
+    # Traversal for saare records
+    for category, amount, _ in rows:
+        category_totals[category] += amount
+    
+    # Sort categories according to total expense
+    category_data = sorted(
+        category_totals.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+    # Extract category names ---> separate list
+    categories = [x[0] for x in category_data]
+    # Extract total amounts ---> separate list
+    amounts = [x[1] for x in category_data]
 
 
 # ---------------- LOGOUT ----------------
