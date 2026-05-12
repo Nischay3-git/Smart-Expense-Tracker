@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>Monthly Analysis</h2>
+
+{% for month in sorted_months %}
+
+<details style="margin-bottom:20px;" open>
+
+    <summary style="cursor:pointer; font-size:18px;">
+        {{ month }} — ₹{{ "{:,.0f}".format(monthly_totals[month]) }}
+    </summary>
+
+    <div class="grid" style="margin-top:10px;">
+
+        <!-- TABLE -->
+        <div>
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                </tr>
+
+                {% for exp in monthly_expenses[month] %}
+                <tr>
+                    <td>{{ exp.date }}</td>
+                    <td>{{ exp.category }}</td>
+                    <td>₹{{ exp.amount }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- PIE -->
+        <div>
+            <img src="{{ url_for('static', filename=monthly_chart_files[month]) }}?v={{ version }}">
+        </div>
+
+    </div>
+
+</details>
+
+{% endfor %}
+
+{% endblock %}
