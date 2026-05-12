@@ -93,7 +93,51 @@ def dashboard():
     # Extract total amounts ---> separate list
     amounts = [x[1] for x in category_data]
 
+# ---------------- ADD EXPENSE ----------------
+@app.route("/add", methods=["GET", "POST"])
+def add():
 
+    if "user_id" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+
+        try:
+
+            amount = float(request.form["amount"])
+
+            category = request.form["category"]
+
+            date = request.form["date"]
+
+            conn = connect_db()
+            cur = conn.cursor()
+
+            cur.execute('''
+            INSERT INTO expenses(
+                user_id,
+                amount,
+                category,
+                date
+            )
+            VALUES (?, ?, ?, ?)
+            ''', (
+                session["user_id"],
+                amount,
+                category,
+                date
+            ))
+
+            conn.commit()
+            conn.close()
+
+            return redirect("/dashboard")
+
+        except Exception as e:
+
+            return f"Error: {e}"
+
+    return render_template("add.html")
 # ---------------- LOGOUT ----------------
 @app.route("/logout")
 def logout():
