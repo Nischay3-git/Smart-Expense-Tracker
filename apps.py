@@ -172,6 +172,117 @@ def dashboard():
         bar_file=bar_file
     )
 
+# ---------------- MONTHLY ANALYTICS ----------------
+@app.route("/monthly")
+def monthly():
+    # Check if user is logged in
+    # Agar user session me nahi hai, redirect to home/login page
+    if "user_id" not in session:
+        return redirect("/")
+
+    conn = connect_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT category, amount, date
+        FROM expenses
+        WHERE user_id = ?
+        ORDER BY date DESC
+    """, (session["user_id"],))
+
+    rows = cur.fetchall()
+
+    conn.close()
+
+    monthly_expenses = defaultdict(list)
+    monthly_totals = defaultdict(float)
+
+    for category, amount, date in rows:
+
+        dt = datetime.strptime(date, "%Y-%m-%d")
+
+        month_key = dt.strftime("%B %Y")
+
+        monthly_expenses[month_key].append({
+            "category": category,
+            "amount": amount,
+            "date": date
+        })
+
+        monthly_totals[month_key] += amount
+    # Sort months in descending order (latest month first)
+    sorted_months = sorted(
+        monthly_expenses.keys(),
+        key=lambda x: datetime.strptime(x, "%B %Y"),
+        reverse=True
+    )
+
+    os.makedirs("static/monthly_charts", exist_ok=True)
+
+    monthly_chart_files = {}
+
+    for month in sorted_months:
+
+        expenses = monthly_expenses[month]
+
+        cat_totals = defaultdict(float)
+
+        for e in expenses:
+            cat_totals[e["category"]] += e["amount"]
+
+        labels = list(cat_totals.keys())
+        values = list(cat_totals.values())
+
+        plt.clf()
+
+        if values:
+
+            plt.figure(figsize=(4,4))
+
+            plt.pie(
+                values,
+                labels=None,
+                autopct='%1.1f%%'
+            )
+
+            if len(labels) > 1:
+
+                plt.legend(
+                    labels,
+                    loc="center left",
+                    bbox_to_anchor=(1,0.5),
+                    fontsize=8
+                )
+
+            plt.title(month)
+
+            filename = (
+                f"monthly_charts/"
+                f"user_{session['user_id']}_"
+                f"{month.replace(' ', '_')}.png"
+            )
+
+            full_path = os.path.join("static", filename)
+
+            plt.savefig(
+                full_path,
+                bbox_inches='tight'
+            )
+
+            monthly_chart_files[month] = filename
+    # timestamp for refreshing charts
+    version = int(time.time())
+
+    # monthly.html pe sb kuch send
+    return render_template(
+        "monthly.html",
+        monthly_expenses=monthly_expenses,
+        monthly_totals=monthly_totals,
+        sorted_months=sorted_months,
+        monthly_chart_files=monthly_chart_files,
+        version=version
+    )
+
 # ---------------- ADD EXPENSE ----------------
 @app.route("/add", methods=["GET", "POST"])
 def add():
