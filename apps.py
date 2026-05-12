@@ -33,4 +33,18 @@ def login():
             return redirect("/dashboard")
 
     return render_template("login.html")
-  
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        user = request.form["username"]
+        pwd = request.form["password"]
+
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO users(username,password) VALUES(?,?)", (user, pwd))
+        conn.commit()
+
+        return redirect("/")
+
+    return render_template("register.html")
